@@ -1,0 +1,29 @@
+Role,Hero,PrimaryLane,SecondaryLane,Type,PlayStyle,BuildStyle,BuildVariant,PenType,Patch,Item1,Item2,Item3,Item4,Item5,Item6
+Fighter,Paquito,EXP,Jungle,Energy Fighter,Short-trade spam,CDR Burst + Pen,,,1.9.92,Warrior Boots,War Axe,Hunter Strike,Dominance Ice,Malefic Roar,Immortality
+Fighter,Leomord,EXP,Jungle,Mana Fighter,Cavalry Burst,Burst + Pen,,,1.9.92,Tough Boots,Endless Battle,War Axe,Blade of Despair,Malefic Roar,Immortality
+Fighter,Lapu-Lapu,EXP,-,Mana Fighter,Hybrid Dive,CDR + Burst,,,1.9.92,Warrior Boots,War Axe,Bloodlust Axe,Dominance Ice,Brute Force Breastplate,Immortality
+Fighter,Aldous,Jungle,EXP,Mana Fighter,Scaling Puncher,Burst + Sustain,,,1.9.92,Tough Boots,Endless Battle,Haas's Claws,Blade of Despair,Brute Force Breastplate,Immortality
+Fighter,Yin,Jungle,EXP,Mana Fighter,Isolated Duelist,Burst + Pen,,,1.9.92,Warrior Boots,Endless Battle,Hunter Strike,Malefic Roar,Blade of Despair,Immortality
+Fighter,Arlott,EXP,Roam,Mana Fighter,Flick Burst,Burst + Sustain,,,1.9.92,Warrior Boots,War Axe,Hunter Strike,Dominance Ice,Blade of Despair,Immortality
+Fighter,Aulus,EXP,Jungle,Mana Fighter,Scaling DPS,Hybrid Burst DPS,,,1.9.92,Warrior Boots,Endless Battle,War Axe,Corrosion Scythe,Malefic Roar,Immortality
+Fighter,Alucard,Jungle,EXP,Lifesteal Fighter,Hybrid Duelist,Lifesteal Hybrid,,,1.9.92,Warrior Boots,Haas's Claws,War Axe,Bloodlust Axe,Blade of Despair,Immortality
+Fighter,Dyrroth,EXP,Jungle,Physical Fighter,Armor Shredder,Burst + Lifesteal,,,1.9.92,Warrior Boots,Haas's Claws,War Axe,Hunter Strike,Malefic Roar,Immortality
+Fighter,Argus,EXP,-,Crit Fighter,Crit Burst,Crit + Lifesteal,,,1.9.92,Warrior Boots,Berserker's Fury,Haas's Claws,Windtalker,Blade of Despair,Malefic Roar
+Fighter,Thamuz,EXP,-,Energy Fighter,Molten Bruiser,Spellvamp Sustain,,,1.9.92,Warrior Boots,War Axe,Corrosion Scythe,Bloodlust Axe,Brute Force Breastplate,Immortality
+Fighter,Martis,Jungle,EXP,No Mana Fighter,CC Duelist,Burst + Utility,,,1.9.92,Tough Boots,War Axe,Hunter Strike,Malefic Roar,Brute Force Breastplate,Immortality
+Fighter,Yu Zhong,EXP,-,Energy Fighter,Dragon Bruiser,Spellvamp + Tank,,,1.9.92,Warrior Boots,War Axe,Bloodlust Axe,Dominance Ice,Brute Force Breastplate,Immortality
+Fighter,Chou,EXP,Roam,Energy Fighter,Disrupt,Tank Utility,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Brute Force Breastplate,Immortality
+Fighter,Ruby,EXP,Roam,Mana Fighter,Lifesteal Control,Sustain Tank,,,1.9.92,Tough Boots,Dominance Ice,Oracle,Brute Force Breastplate,Athena's Shield,Immortality
+Fighter,Minsitthar,EXP,Roam,Mana Fighter,Anti-Dash Captain,Utility Tank,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Guardian Helmet,Immortality
+Fighter,Terizla,EXP,-,Mana Fighter,Heavy CC,Tank Bruiser,,,1.9.92,Tough Boots,Bloodlust Axe,War Axe,Dominance Ice,Brute Force Breastplate,Immortality
+Fighter,Balmond,Jungle,EXP,No Mana Fighter,Objective Secure,Sustain Jungler,,,1.9.92,Tough Boots,Cursed Helmet,War Axe,Guardian Helmet,Dominance Ice,Immortality
+Fighter,Cici,EXP,-,Mana Fighter,Spinner On-hit,On-hit DPS,,,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Immortality
+Fighter,Masha,EXP,-,Energy Fighter,Split Push,Tanky Sustain,,,1.9.92,Tough Boots,Dominance Ice,Guardian Helmet,Antique Cuirass,Athena's Shield,Immortality
+Fighter,Jawhead,EXP,-,Mana Fighter,Pick Diver,Burst + CDR,,,1.9.92,Warrior Boots,War Axe,Hunter Strike,Malefic Roar,Brute Force Breastplate,Immortality
+Fighter,Badang,EXP,-,Mana Fighter,Wall Burst,Burst + Pen,,,1.9.92,Tough Boots,War Axe,Hunter Strike,Malefic Roar,Blade of Despair,Immortality
+Fighter,Bane,Mid,EXP,Mana Fighter-Mage,Poke Mage,AP Burst,,,1.9.92,Arcane Boots,Clock of Destiny,Lightning Truncheon,Genius Wand,Holy Crystal,Immortality
+Fighter,Guinevere,EXP,Jungle,Mana Fighter-Mage,Burst Caster,AP Combo,,,1.9.92,Arcane Boots,Clock of Destiny,Lightning Truncheon,Genius Wand,Concentrated Energy,Immortality
+Fighter,Phoveus,EXP,Mid,Mana Fighter-Mage,Anti-Dash,AP Sustain,,,1.9.92,Arcane Boots,Clock of Destiny,Lightning Truncheon,Genius Wand,Concentrated Energy,Immortality
+Fighter,Silvanna,EXP,Roam,Mana Fighter-Mage,Lockdown,AP Sustain,,,1.9.92,Arcane Boots,Glowing Wand,Concentrated Energy,Genius Wand,Radiant Armor,Immortality
+Fighter,Julian,Mid,EXP,Mana Hybrid,Spell Combo,Magic On-hit + Pen,,,1.9.92,Arcane Boots,Feather of Heaven,Genius Wand,Starlium Scythe,Holy Crystal,Divine Glaive
+Fighter,X.Borg,EXP,-,Energy Fighter,True Damage Bruiser,Spellvamp Sustain,,,1.9.92,Tough Boots,War Axe,Bloodlust Axe,Brute Force Breastplate,Antique Cuirass,Immortality

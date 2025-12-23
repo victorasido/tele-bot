@@ -1,0 +1,21 @@
+Role,Hero,PrimaryLane,SecondaryLane,Type,PlayStyle,BuildStyle,BuildVariant,PenType,Patch,Item1,Item2,Item3,Item4,Item5,Item6
+Tank,Tigreal,Roam,-,Pure Tank,Initiator / AoE CC,Full Defense,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Blade Armor,Immortality
+Tank,Atlas,Roam,-,Pure Tank,Engage / Flicker Combo,Full Defense,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Guardian Helmet,Athena's Shield,Immortality
+Tank,Khufra,Roam,-,Pure Tank,Anti-Dash / Counter Engage,Defense + Anti-Burst,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Blade Armor,Immortality
+Tank,Franco,Roam,-,Pick-Off Tank,Hook Control / Single Lock,Defense + Utility,,,1.9.92,Rapid Boots,Dominance Ice,Athena's Shield,Antique Cuirass,Blade Armor,Immortality
+Tank,Lolita,Roam,Support,Shield Support Tank,Projectile Counter / Team Shield,Defense + Magic Res,,,1.9.92,Tough Boots,Dominance Ice,Athena's Shield,Antique Cuirass,Radiant Armor,Immortality
+Tank,Johnson,Roam,Mid-Rotation,Magic Tank,Engage / Map Roaming,Hybrid (Magic + Defense),,,1.9.92,Tough Boots,Glowing Wand,Dominance Ice,Athena's Shield,Ice Queen Wand,Immortality
+Tank,Baxia,Jungle,EXP,Anti-Heal Tank,Rolling Sustain / Mobility,HP Regen + Anti-Heal,,,1.9.92,Tough Boots,Cursed Helmet,Guardian Helmet,Dominance Ice,Athena's Shield,Immortality
+Tank,Akai,Jungle,Roam,Disruptor Tank,CC Zone / Knockback,Jungle HP Regen,,,1.9.92,Tough Boots,Cursed Helmet,Guardian Helmet,Antique Cuirass,Athena's Shield,Immortality
+Tank,Uranus,EXP,-,Regen Tank,Sustain Lane / Poke,HP Regen + Magic Res,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Oracle,Athena's Shield,Immortality
+Tank,Grock,Roam / EXP,-,Aggro Tank,Wall Control / Burst Early,Hybrid Defense,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Guardian Helmet,Immortality
+Tank,Barats,Jungle / EXP,-,Scaling Tank,HP-Based Fighter / CC,Hybrid Defense + CDR,,,1.9.92,Tough Boots,War Axe,Dominance Ice,Antique Cuirass,Athena's Shield,Immortality
+Tank,Gloo,EXP,Roam,Split Tank,Stick Target / Regen,HP Regen + Magic Def,,,1.9.92,Tough Boots,Glowing Wand,Oracle,Radiant Armor,Dominance Ice,Immortality
+Tank,Gatotkaca,EXP,Roam,Hybrid Fighter-Tank,AoE CC / Magic Burst,Defense + Magic Hybrid,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Glowing Wand,Immortality
+Tank,Belerick,Roam / EXP,-,Reflect Tank,HP Reflect / Sustain,HP Stack + Regen,,,1.9.92,Tough Boots,Antique Cuirass,Athena's Shield,Guardian Helmet,Cursed Helmet,Immortality
+Tank,Minotaur,Roam,Support,Rage Tank,Heal / CC Team Fight,Full Defense,,,1.9.92,Tough Boots,Dominance Ice,Antique Cuirass,Athena's Shield,Guardian Helmet,Immortality
+Tank,Hylos,Roam / EXP,-,HP Tank,Aura Slow / Path Control,HP Regen + Utility,,,1.9.92,Tough Boots,Guardian Helmet,Antique Cuirass,Oracle,Dominance Ice,Immortality
+Tank,Edith,EXP,-,Hybrid Fighter-Tank,Marksman Mode / Defense Scaling,Hybrid Attack-Defense,,,1.9.92,Tough Boots,War Axe,Dominance Ice,Antique Cuirass,Athena's Shield,Immortality
+Tank,Esmeralda,EXP,Mid,Shield-Mage Tank,Shield Steal / Sustain,Magic Defense + Regen,,,1.9.92,Tough Boots,Dominance Ice,Oracle,Radiant Armor,Athena's Shield,Immortality
+Tank,Fredrinn,Jungle / EXP,-,Combo Fighter-Tank,Stack Combo Damage / Sustain,Hybrid Fighter Defense,,,1.9.92,Tough Boots,War Axe,Dominance Ice,Cursed Helmet,Antique Cuirass,Immortality
+Tank,Alice,EXP / Mid,-,Mage Tank,Lifesteal / Mana Sustain,Magic Regen + Defense,,,1.9.92,Tough Boots,Glowing Wand,Dominance Ice,Oracle,Radiant Armor,Immortality

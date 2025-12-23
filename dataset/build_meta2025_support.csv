@@ -1,0 +1,11 @@
+Role,Hero,PrimaryLane,SecondaryLane,Type,PlayStyle,BuildStyle,BuildVariant,PenType,Patch,Item1,Item2,Item3,Item4,Item5,Item6
+Support,Estes,Roam,Mid,Healer Support,Teamfight sustain / global heal,CDR + Heal + Tankiness,Healer,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Oracle,Dominance Ice,Athena's Shield,Immortality
+Support,Floryn,Roam,Gold,Healer / Buffer,Backline poke + heal share,CDR + Heal + Utility,Healer,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Oracle,Ice Queen Wand,Dominance Ice,Immortality
+Support,Rafaela,Roam,Mid,Healer / MS Support,Poke + MS + sustain,CDR + Heal + Slow,Healer,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Dominance Ice,Athena's Shield,Immortality
+Support,Angela,Roam,Mid,Attach Support,Follow-up engage ulti,CDR + Shield + Utility,Utility,Magic Pen,1.9.92,Demon Shoes,Enchanted Talisman,Fleeting Time,Ice Queen Wand,Oracle,Immortality
+Support,Diggie,Roam,Mid,Anti-CC Support,Counter CC + vision,CDR + Tank Utility,Utility,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Fleeting Time,Dominance Ice,Athena's Shield,Immortality
+Support,Carmilla,Roam,EXP,Bruiser Support,AOE slow + damage share,Tank + Magic Utility,Bruiser,Magic Pen,1.9.92,Tough Boots,Dominance Ice,Oracle,Ice Queen Wand,Antique Cuirass,Immortality
+Support,Mathilda,Roam,Mid,Mobility Support,Engage/disengage + shield,Hybrid Damage + Utility,Utility,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Dominance Ice,Athena's Shield,Immortality
+Support,Faramis,Roam,Mid,Ult Utility Support,Revive / anti-burst,CDR + HP + Magic Pen,Burst Utility,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Fleeting Time,Dominance Ice,Divine Glaive,Immortality
+Support,Chip,Roam,-,Macro Utility Support,Portal rotation + CC,CDR + Tank Utility,Utility,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Fleeting Time,Dominance Ice,Athena's Shield,Immortality
+Support,Kaja,Roam,EXP,Pick-off Support,Single target suppress,Burst + Utility,Burst,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Genius Wand,Divine Glaive,Dominance Ice,Immortality

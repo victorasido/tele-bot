@@ -1,0 +1,23 @@
+Role,Hero,PrimaryLane,SecondaryLane,Type,PlayStyle,BuildStyle,BuildVariant,PenType,Patch,Item1,Item2,Item3,Item4,Item5,Item6
+Mage,Lunox,Mid,-,Burst Hybrid Mage,Skill Burst / Lifesteal,Burst + Sustain,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Genius Wand,Holy Crystal,Divine Glaive,Immortality
+Mage,Yve,Mid,-,Control / Zoner Mage,Poke & Zone,Poke + Area Control,,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Valentina,Mid,-,Scaling / Copy Mage,Scaling Burst,Scaling + Sustain,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Holy Crystal,Divine Glaive,Immortality
+Mage,Xavier,Mid,-,Poke / Range Mage,Long Range Poke,Burst + Range,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Divine Glaive,Holy Crystal,Immortality
+Mage,Kagura,Mid,-,Burst Mage,Combo Burst,Burst + AoE,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Genius Wand,Holy Crystal,Divine Glaive
+Mage,Lylia,Mid,-,Spam Mage,Fast DPS Spam,Mobility + Poke,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Feather of Heaven,Genius Wand,Holy Crystal,Divine Glaive
+Mage,Pharsa,Mid,-,Burst / Zoner Mage,Aerial Poke,Long Range Zoning,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Cecilion,Mid,-,Scaling Mage,Late Game Sustain,Scaling + Burst,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Holy Crystal,Divine Glaive,Immortality
+Mage,Vale,Mid,-,Burst / Utility Mage,Combo CC,Burst + Utility,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Genius Wand,Holy Crystal,Divine Glaive
+Mage,Harith,Mid,EXP,Mobility Mage,Sustain DPS,Magic DPS + Lifesteal,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Feather of Heaven,Concentrated Energy,Holy Crystal,Divine Glaive
+Mage,Harley,Mid,Jungle,Assassin Mage,Burst Pick,Single Target Burst,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Genius Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Chang’e,Mid,-,Poke / Push Mage,Spam Poke,Zone + Push,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Cyclops,Mid,-,Spam / Mobility Mage,Constant DPS,Spam + Mobility,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Feather of Heaven,Genius Wand,Holy Crystal,Divine Glaive
+Mage,Gord,Mid,-,Beam / Zoner Mage,Long Range Beam,Burst + Zone,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Vexana,Mid,-,Summon / Control Mage,CC & Summon,Utility + Control,,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Aurora,Mid,-,Burst / Freeze Mage,Freeze Combo,Burst + CC,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Genius Wand,Holy Crystal,Divine Glaive
+Mage,Kadita,Mid,Roam,Assassin / Burst Mage,Dive Burst,Anti-Dive Burst,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Genius Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Odette,Mid,-,Burst AoE Mage,Teamfight Burst,AoE Burst,,Magic Pen,1.9.92,Arcane Boots,Enchanted Talisman,Lightning Truncheon,Genius Wand,Holy Crystal,Divine Glaive
+Mage,Luo Yi,Mid,Roam,Utility / Support Mage,CC Utility,Support + Magic Pen,,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Genius Wand,Divine Glaive,Immortality
+Mage,Nana,Mid,Roam,Support / CC Mage,CC + Poke,CC + Magic Damage,,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Zhask,Mid,-,Summoner Mage,Push / Summon,Push + Poke,,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Ice Queen Wand,Divine Glaive,Holy Crystal,Immortality
+Mage,Alice,EXP,Mid,Sustain / Lifesteal Mage,Sustain Teamfight,Hybrid Defense + Magic Lifesteal,,Magic Pen,1.9.92,Tough Boots,Enchanted Talisman,Clock of Destiny,Holy Crystal,Oracle,Immortality

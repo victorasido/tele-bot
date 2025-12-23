@@ -1,0 +1,23 @@
+Role,Hero,PrimaryLane,SecondaryLane,Type,PlayStyle,BuildStyle,BuildVariant,PenType,Patch,Item1,Item2,Item3,Item4,Item5,Item6
+Marksman,Wanwan,Gold,-,On-hit / Mobile DPS,Kite & outplay,Trinity + WoN,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Wind of Nature,Malefic Roar
+Marksman,Beatrix,Gold,-,Adaptive Burst,Weapon swap burst,Burst + Survivability,,Malefic Gun,1.9.92,Swift Boots,Blade of Despair,Hunter Strike,Malefic Gun,Wind of Nature,Endless Battle
+Marksman,Brody,Gold,-,Burst Poke,Single-hit trades,Burst + Pen,,Malefic Gun,1.9.92,Swift Boots,Hunter Strike,Malefic Gun,Blade of Despair,Wind of Nature,Endless Battle
+Marksman,Bruno,Gold,-,Crit Carry,Poke then all-in,Crit + Pen,,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Windtalker,Malefic Gun,Blade of Despair,Wind of Nature
+Marksman,Clint,Gold,-,Burst Crit,Skill + basic burst,Crit + Pen,,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Windtalker,Malefic Gun,Blade of Despair,Wind of Nature
+Marksman,Granger,Jungle,Gold,Skill Burst,Rhapsody poke,CDR/Pen + Burst,,Malefic Gun,1.9.92,Swift Boots,Hunter Strike,Malefic Gun,Blade of Despair,Endless Battle,Wind of Nature
+Marksman,Karrie,Gold,-,Anti-tank / On-hit,Front-to-back DPS,AS Trinity,,Malefic Roar,1.9.92,Swift Boots,Demon Hunter Sword,Corrosion Scythe,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Moskov,Gold,-,On-hit / Teamfight,Skewer teamfight,AS Trinity,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Irithel,Gold,-,Crit / Mobility,Drive-by DPS,Crit + Survivability,,Malefic Gun,1.9.92,Swift Boots,Windtalker,Berserker's Fury,Malefic Gun,Wind of Nature,Blade of Despair
+Marksman,Hanabi,Gold,-,On-hit / Sustain,Shielded DPS,AS Trinity + WoN,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Layla,Gold,-,Crit Backline,Long-range DPS,Crit + Pen,,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Windtalker,Malefic Gun,Blade of Despair,Wind of Nature
+Marksman,Miya,Gold,-,On-hit / Split,Split push DPS,AS Trinity + Pen,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Lesley,Gold,-,One-shot Crit,Snipe/Poke,High Crit + Pen,,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Malefic Gun,Blade of Despair,Windtalker,Wind of Nature
+Marksman,Popol and Kupa,Gold,Roam,On-hit Utility,Pet pressure,AS Trinity + Pen,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Yi Sun-shin,Jungle,Gold,Hybrid Assassin/MM,Objective control,Burst + Pen,,Malefic Gun,1.9.92,Swift Boots,Hunter Strike,Endless Battle,Malefic Gun,Blade of Despair,Wind of Nature
+Marksman,Natan,Mid,Gold,Magic On-hit,Kite/AP DPS,Magic AS + Pen,,Magic Pen,1.9.92,Arcane Boots,Feather of Heaven,Genius Wand,Starlium Scythe,Divine Glaive,Holy Crystal
+Marksman,Kimmy,Mid,Gold,Magic DPS,Kite/AP On-hit,Magic DoT + Slow,,Magic Pen,1.9.92,Arcane Boots,Glowing Wand,Ice Queen Wand,Starlium Scythe,Divine Glaive,Holy Crystal
+Marksman,Melissa,Gold,-,On-hit Peel,Anti-dive,AS Trinity + WoN,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Ixia,Gold,-,On-hit Beam,Teamfight beam,AS Trinity + Pen,,Malefic Roar,1.9.92,Swift Boots,Corrosion Scythe,Demon Hunter Sword,Golden Staff,Malefic Roar,Wind of Nature
+Marksman,Claude,Gold,Jungle,On-hit Mobility,Blazing Duet farm,AS Trinity + WoN,,Malefic Roar,1.9.92,Swift Boots,Demon Hunter Sword,Golden Staff,Corrosion Scythe,Malefic Roar,Wind of Nature
+Marksman,Roger,Jungle,Gold,Hybrid Fighter/MM,Chase/Execute,AS + Lifesteal + Pen,,Malefic Gun,1.9.92,Warrior Boots,Windtalker,Haas's Claws,Blade of Despair,Malefic Gun,Endless Battle
+Marksman,Obsidia,Gold,-,Crit Scaling,Stack-based DPS,Full Crit + Pen,,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Windtalker,Malefic Gun,Blade of Despair,Wind of Nature

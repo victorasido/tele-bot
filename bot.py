@@ -1,3 +1,4 @@
+# bot.py
 import asyncio
 import os
 from dotenv import load_dotenv
@@ -25,7 +26,9 @@ bot = Bot(
 )
 dp = Dispatcher()
 
-dp.include_router(menu.router)
+# Registrasi router
+
+dp.include_router(menu.router)  
 dp.include_router(hero.router)
 dp.include_router(counter.router)
 dp.include_router(gameplay.router)
