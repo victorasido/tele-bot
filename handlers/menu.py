@@ -1,8 +1,9 @@
-# handlers/menu.py
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.fsm.context import FSMContext  # <--- Import baru
+from core.states import BotStates           # <--- Import baru
 
 router = Router()
 
@@ -19,12 +20,6 @@ async def menu(m: Message):
     await show_root_menu(m)
 
 async def show_root_menu(m: Message | CallbackQuery):
-    """
-    Level 1 (sesuai kerangka):
-    - Hero
-    - Tier List
-    - Tidak Rekomendasikan
-    """
     kb = InlineKeyboardBuilder()
     kb.button(text="🧝‍♂️ Hero", callback_data="menu:hero")
     kb.button(text="📊 Tier List", callback_data="menu:tier")
@@ -43,14 +38,6 @@ async def show_root_menu(m: Message | CallbackQuery):
 # =========================
 @router.callback_query(F.data == "menu:hero")
 async def menu_hero(c: CallbackQuery):
-    """
-    Level 2 Hero:
-    -- Build
-    -- Recounter
-    -- Counter
-    -- Gameplay
-    -- Komposisi team
-    """
     kb = InlineKeyboardBuilder()
     kb.button(text="🔧 Build", callback_data="hero:build")
     kb.button(text="🔁 Recounter", callback_data="hero:recounter")
@@ -63,39 +50,55 @@ async def menu_hero(c: CallbackQuery):
     await c.message.edit_text("Menu lanjutan Hero:", reply_markup=kb.as_markup())
     await c.answer()
 
-# Trigger per aksi Hero
+# Trigger per aksi Hero (UPDATED WITH FSM)
 @router.callback_query(F.data.startswith("hero:"))
-async def hero_actions(c: CallbackQuery):
+async def hero_actions(c: CallbackQuery, state: FSMContext):
     action = c.data.split(":")[1]
-    examples = {
-        "build": "Masukkan perintah:\n/build <Hero> lane=<mid|gold|exp|roam|jungle> enemy=<magic|physical|campur>\nContoh: /build Harith lane=mid enemy=campur",
-        "recounter": "Masukkan perintah:\n/counter <HeroLawan>\nContoh: /counter Wanwan\n(catatan: recounter=hero yang ‘balik meng-counter’)",
-        "counter": "Masukkan perintah:\n/counter <HeroLawan>\nContoh: /counter Wanwan",
-        "gameplay": "Masukkan perintah:\n/gameplay <Hero> lane=<lane?>\nContoh: /gameplay Harith lane=mid",
-        "comp": "Masukkan perintah:\n/komposisi",
+
+    # Mapping aksi ke State yang sesuai
+    state_mapping = {
+        "build": (BotStates.waiting_for_hero_build, "🔧 Mode Build Aktif.\nSilakan ketik **Nama Hero** yang ingin kamu build (misal: Harith)."),
+        "counter": (BotStates.waiting_for_hero_counter, "🛡 Mode Counter Aktif.\nSilakan ketik **Nama Hero** lawan yang ingin dicounter (misal: Fanny)."),
+        "gameplay": (BotStates.waiting_for_hero_gameplay, "🎮 Mode Gameplay Aktif.\nSilakan ketik **Nama Hero** (misal: Ling)."),
+        # Recounter sementara diarahkan ke counter biasa dulu
+        "recounter": (BotStates.waiting_for_hero_counter, "🔁 Mode Recounter Aktif.\nSilakan ketik **Nama Hero** lawan (misal: Wanwan)."),
     }
-    kb = InlineKeyboardBuilder()
-    kb.button(text="⬅️ Kembali", callback_data="menu:hero")
-    kb.button(text="🏠 Menu", callback_data="menu:root")
-    kb.adjust(2)
-    await c.message.edit_text(examples.get(action, "Fitur belum tersedia."), reply_markup=kb.as_markup())
-    await c.answer()
+
+    if action in state_mapping:
+        target_state, reply_text = state_mapping[action]
+        await state.set_state(target_state) # Bot sekarang "mengingat" dia lagi nunggu input
+        
+        # Tombol cancel
+        kb = InlineKeyboardBuilder()
+        kb.button(text="❌ Batal", callback_data="cancel_action")
+        
+        await c.message.edit_text(reply_text, reply_markup=kb.as_markup())
+        await c.answer()
+    
+    elif action == "comp":
+        # Komposisi tidak butuh input hero, arahkan ke command komposisi
+        await c.message.edit_text("Gunakan command: /komposisi\n(Fitur auto-run bisa ditambahkan nanti)")
+        await c.answer()
+    
+    else:
+        await c.message.edit_text("Fitur ini belum tersedia.")
+        await c.answer()
+
+# Handler tombol Batal (BARU)
+@router.callback_query(F.data == "cancel_action")
+async def cancel_handler(c: CallbackQuery, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state:
+        await state.clear()
+    await c.message.edit_text("Aksi dibatalkan. Kembali ke menu utama.")
+    # Kita panggil menu root lagi
+    await show_root_menu(c)
 
 # =========================
-# Submenu: Tier List
+# Submenu: Tier List (Tidak berubah)
 # =========================
 @router.callback_query(F.data == "menu:tier")
 async def menu_tier(c: CallbackQuery):
-    """
-    Level 2 Tier List:
-    -- Prioritas rate
-       --- Pick % 10
-       --- Ban % 10
-    -- Role
-       --- Tank / Fighter / Marksman / Mage / Support
-    -- Lane
-       --- Roam / Exp / Mid / Gold / Jungle
-    """
     kb = InlineKeyboardBuilder()
     kb.button(text="⭐ Prioritas Rate", callback_data="tier:prio")
     kb.button(text="🧩 Role", callback_data="tier:role")
@@ -105,7 +108,6 @@ async def menu_tier(c: CallbackQuery):
     await c.message.edit_text("Menu lanjutan Tier List:", reply_markup=kb.as_markup())
     await c.answer()
 
-# --- Prioritas Rate sub-submenu
 @router.callback_query(F.data == "tier:prio")
 async def tier_prio(c: CallbackQuery):
     kb = InlineKeyboardBuilder()
@@ -118,7 +120,6 @@ async def tier_prio(c: CallbackQuery):
 
 @router.callback_query(F.data.in_(["tier:pick10", "tier:ban10"]))
 async def tier_prio_actions(c: CallbackQuery):
-    # NOTE: fitur ini butuh dataset pick_rate/ban_rate; sementara beri informasi
     mapping = {
         "tier:pick10": "Gunakan: /pick10\n(catatan: butuh dataset pick_rate)",
         "tier:ban10": "Gunakan: /ban10\n(catatan: butuh dataset ban_rate)",
@@ -129,7 +130,6 @@ async def tier_prio_actions(c: CallbackQuery):
     await c.message.edit_text(mapping[c.data], reply_markup=kb.as_markup())
     await c.answer()
 
-# --- Role sub-submenu
 @router.callback_query(F.data == "tier:role")
 async def tier_role(c: CallbackQuery):
     kb = InlineKeyboardBuilder()
@@ -143,7 +143,6 @@ async def tier_role(c: CallbackQuery):
 @router.callback_query(F.data.startswith("tier:role:"))
 async def tier_role_run(c: CallbackQuery):
     role = c.data.split(":")[2]
-    # Di sini kita arahkan user ke command yang sudah ada (/tierrole)
     text = f"Gunakan: /tierrole {role}"
     kb = InlineKeyboardBuilder()
     kb.button(text="⬅️ Kembali", callback_data="tier:role")
@@ -151,7 +150,6 @@ async def tier_role_run(c: CallbackQuery):
     await c.message.edit_text(text, reply_markup=kb.as_markup())
     await c.answer()
 
-# --- Lane sub-submenu
 @router.callback_query(F.data == "tier:lane")
 async def tier_lane(c: CallbackQuery):
     kb = InlineKeyboardBuilder()
@@ -173,14 +171,10 @@ async def tier_lane_run(c: CallbackQuery):
     await c.answer()
 
 # =========================
-# Submenu: Tidak Rekomendasikan
+# Submenu: Tidak Rekomendasikan (Tidak berubah)
 # =========================
 @router.callback_query(F.data == "menu:lowest")
 async def menu_lowest(c: CallbackQuery):
-    """
-    Level 2:
-    - Tidak Rekomendasikan → 10 Lowest
-    """
     kb = InlineKeyboardBuilder()
     kb.button(text="📉 10 Lowest", callback_data="lowest:10")
     kb.button(text="⬅️ Kembali", callback_data="menu:root")
@@ -190,7 +184,6 @@ async def menu_lowest(c: CallbackQuery):
 
 @router.callback_query(F.data == "lowest:10")
 async def lowest_run(c: CallbackQuery):
-    # NOTE: butuh dataset win_rate atau power metric.
     text = "Gunakan: /lowest10\n(catatan: butuh win_rate/power metric di dataset)"
     kb = InlineKeyboardBuilder()
     kb.button(text="⬅️ Kembali", callback_data="menu:lowest")
