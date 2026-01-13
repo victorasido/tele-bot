@@ -5,95 +5,116 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from core.states import BotStates
 
+# Import DAL yang baru diperbaiki
 from data.dal import get_hero_by_name
-from core.rules import make_default_build, adjust_by_enemy_mix, lane_warning
-from core.gemini import compose_with_gemini
 
 router = Router()
 
-# ---------------------------------------------------------
-# 1. CARA LAMA (Manual Command)
-# ---------------------------------------------------------
+# =========================================================
+# 1. LOGIC UTAMA: FORMAT & KIRIM PESAN BUILD
+# =========================================================
+async def send_hero_build(m: Message, hero_name: str):
+    # 1. Cari data hero di CSV via DAL
+    hero = get_hero_by_name(hero_name)
+    
+    if not hero:
+        # Jika hero tidak ditemukan
+        await m.answer(
+            f"❌ Hero <b>{hero_name}</b> tidak ditemukan.\n"
+            "Pastikan ejaan benar (contoh: <i>/build Miya</i>)."
+        )
+        return False
+
+    # 2. Ambil data dari dictionary hero (sesuai kolom di HeroData.csv)
+    name = hero.get('Hero', 'Unknown')
+    role = hero.get('Role', '-')
+    lane = hero.get('PrimaryLane', '-')
+    sec_lane = hero.get('SecondaryLane', '-')
+    dmg_type = hero.get('Type', '-')  # Kolom Type biasanya berisi Physical/Magic
+    patch = hero.get('Patch', 'Terbaru')
+    
+    # Ambil 6 item
+    items = [
+        hero.get('Item1', '-'),
+        hero.get('Item2', '-'),
+        hero.get('Item3', '-'),
+        hero.get('Item4', '-'),
+        hero.get('Item5', '-'),
+        hero.get('Item6', '-')
+    ]
+    
+    # Bersihkan nama item (hapus nan/strip)
+    build_list = []
+    for i, item in enumerate(items, 1):
+        if item and str(item).lower() != 'nan':
+            build_list.append(f"{i}. {item}")
+    
+    build_text = "\n".join(build_list) if build_list else "Belum ada data item."
+
+    # 3. Susun Pesan Jawaban (Format Rapi)
+    response_text = (
+        f"🛠 <b>Rekomendasi Build: {name}</b>\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"🎭 <b>Role:</b> {role}\n"
+        f"📍 <b>Lane:</b> {lane} / {sec_lane}\n"
+        f"⚔️ <b>Tipe:</b> {dmg_type}\n"
+        f"🔖 <b>Patch:</b> {patch}\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"<b>⚔️ Core Build Item:</b>\n"
+        f"{build_text}\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"<i>💡 Gunakan /counter {name} untuk melihat kelemahannya.</i>"
+    )
+
+    await m.answer(response_text)
+    return True
+
+# =========================================================
+# 2. HANDLER COMMAND MANUAL (/build nama_hero)
+# =========================================================
 @router.message(Command("build"))
 async def build_cmd(m: Message):
     """
-    /build Harith lane=mid enemy=campur
+    Contoh: /build Miya
     """
-    try:
-        parts = (m.text or "").split()
-        if len(parts) < 2:
-            return await m.answer("Contoh: /build Harith lane=mid enemy=campur")
+    text = m.text.strip()
+    parts = text.split(maxsplit=1)
+    
+    if len(parts) < 2:
+        await m.answer("Gunakan format: <code>/build NamaHero</code>\nContoh: <code>/build Gusion</code>")
+        return
 
-        hero_name = parts[1]
-        lane = None
-        enemy = "campur"
-        for p in parts[2:]:
-            if p.startswith("lane="):
-                lane = p.split("=", 1)[1]
-            if p.startswith("enemy="):
-                enemy = p.split("=", 1)[1]
+    hero_input = parts[1]
+    await send_hero_build(m, hero_input)
 
-        await process_build_logic(m, hero_name, lane, enemy)
-
-    except Exception as e:
-        await m.answer(f"Error: {e}")
-
-# ---------------------------------------------------------
-# 2. CARA BARU (Interaktif via Menu)
-# ---------------------------------------------------------
+# =========================================================
+# 3. HANDLER INPUT DARI MENU (State FSM)
+# =========================================================
 @router.message(BotStates.waiting_for_hero_build)
 async def process_build_input(m: Message, state: FSMContext):
     hero_name = m.text.strip()
     
-    # Cek batal
-    if hero_name.lower() in ["batal", "cancel", "exit"]:
+    # Cek input batal
+    if hero_name.lower() in ["batal", "cancel", "exit", "/cancel"]:
         await state.clear()
-        await m.answer("Aksi dibatalkan.")
+        await m.answer("✅ Aksi dibatalkan.")
         return
 
-    # Jalankan logic build
-    success = await process_build_logic(m, hero_name, lane=None, enemy="campur")
+    # Panggil fungsi pengirim build
+    success = await send_hero_build(m, hero_name)
     
+    # Jika berhasil, reset state agar bot tidak nunggu input lagi
+    # Jika gagal (hero typo), biarkan state aktif agar user bisa coba ketik ulang
     if success:
-        await state.clear() 
+        await state.clear()
 
-# ---------------------------------------------------------
-# LOGIC INTI (FIXED)
-# ---------------------------------------------------------
-async def process_build_logic(m: Message, hero_name: str, lane: str | None, enemy: str):
-    hero = get_hero_by_name(hero_name)
-    
-    if not hero:
-        await m.answer(f"❌ Hero '{hero_name}' tidak ditemukan di dataset.\nSilakan coba ketik nama lain.")
-        return False
-
-    base_build = make_default_build(hero, lane)
-    build = adjust_by_enemy_mix(base_build, enemy)
-    warn = lane_warning(hero, lane)
-
-    # --- PERBAIKAN DI SINI ---
-    # Sebelumnya: "hero": hero["Hero"] (Salah, ini cuma kirim string nama)
-    # Sekarang:   "hero": hero         (Benar, kirim full data hero biar AI bisa baca)
-    payload = {
-        "type": "build",
-        "hero": hero, 
-        "input": {"lane": lane if lane else "Auto-detect", "enemy_mix": enemy},
-        "build": build,
-        "warning": warn,
-    }
-    # --------------------------
-
-    # Tampilkan nama hero yang terdeteksi (misal user ketik "nana", bot tahu itu "Nana")
-    detected_name = hero.get('Hero', hero_name)
-    loading_msg = await m.answer(f"⏳ Sedang meracik build untuk **{detected_name}**...")
-    
-    try:
-        response = compose_with_gemini(payload)
-        await loading_msg.edit_text(response)
-        return True
-    except Exception as e:
-        # Tampilkan error detail untuk debugging
-        import traceback
-        traceback.print_exc() 
-        await loading_msg.edit_text(f"Error AI: {e}")
-        return True
+# =========================================================
+# 4. HANDLER INFO HERO LAINNYA (/hero, /role)
+# =========================================================
+@router.message(Command("hero"))
+async def hero_info_cmd(m: Message):
+    """
+    Menampilkan info dasar hero (sama kayak build tapi tanpa item detail, opsional)
+    """
+    # Gunakan logic yang sama dulu
+    await build_cmd(m)

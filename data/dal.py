@@ -10,99 +10,106 @@ _ITEMS = None
 def load_datasets():
     global _HEROES, _ITEMS
     
+    # --- LOAD DATA HERO (DIPERBAIKI) ---
     if _HEROES is None:
-        # --- UPDATE BARU: BACA MULTIPLE CSV ---
-        # Kita meload semua file build_meta2025_*.csv
-        csv_files = [
-            "build_meta2025_fighter.csv",
-            "build_meta2025_mage.csv",
-            "build_meta2025_marksman.csv",
-            "build_meta2025_support.csv",
-            "build_meta2025_tank.csv"
-        ]
+        hero_path = BASE / "HeroData.csv"
         
-        dfs = []
-        for file_name in csv_files:
-            file_path = BASE / file_name
-            # Cek apakah file ada biar gak error kalau ada satu yg kurang
-            if file_path.exists():
-                try:
-                    df = pd.read_csv(file_path)
-                    dfs.append(df)
-                except Exception as e:
-                    print(f"[WARNING] Gagal baca {file_name}: {e}")
-            else:
-                print(f"[WARNING] File tidak ditemukan: {file_name}")
-        
-        if dfs:
-            # Gabungkan semua csv menjadi satu tabel besar
-            _HEROES = pd.concat(dfs, ignore_index=True)
-            
-            # Normalisasi nama hero untuk pencarian
-            # Pastikan kolom 'Hero' ada. Kalau di csv baru namanya beda, sesuaikan.
-            if "Hero" in _HEROES.columns:
-                _HEROES["Hero_norm"] = _HEROES["Hero"].str.lower()
-            else:
-                print("[ERROR] Kolom 'Hero' tidak ditemukan di CSV!")
+        if hero_path.exists():
+            try:
+                # Membaca HeroData.csv
+                _HEROES = pd.read_csv(hero_path)
+                
+                # Normalisasi nama hero untuk pencarian (case-insensitive)
+                if "Hero" in _HEROES.columns:
+                    _HEROES["Hero_norm"] = _HEROES["Hero"].astype(str).str.lower().str.strip()
+                    print(f"[INFO] Berhasil memuat {_HEROES.shape[0]} hero dari HeroData.csv")
+                else:
+                    print("[ERROR] Kolom 'Hero' tidak ditemukan di HeroData.csv!")
+                    _HEROES = pd.DataFrame()
+            except Exception as e:
+                print(f"[ERROR] Gagal membaca HeroData.csv: {e}")
+                _HEROES = pd.DataFrame()
         else:
-            print("[ERROR] Tidak ada dataset hero yang berhasil di-load!")
-            _HEROES = pd.DataFrame() # Return empty df biar gak crash
-            
+            print(f"[WARNING] File dataset tidak ditemukan: {hero_path}")
+            _HEROES = pd.DataFrame()
+
+    # --- LOAD DATA ITEM (OPSIONAL / PELENGKAP) ---
     if _ITEMS is None:
-        # Load item dataset (pastikan file ini ada atau sesuaikan namanya)
         item_path = BASE / "mlbb_items_dataset_enriched.csv"
         if item_path.exists():
-            _ITEMS = pd.read_csv(item_path)
-            _ITEMS["Item_norm"] = _ITEMS["Item"].str.lower()
+            try:
+                _ITEMS = pd.read_csv(item_path)
+                if "Item" in _ITEMS.columns:
+                    _ITEMS["Item_norm"] = _ITEMS["Item"].astype(str).str.lower().str.strip()
+                print("[INFO] Berhasil memuat dataset item.")
+            except Exception as e:
+                print(f"[WARNING] Gagal membaca dataset item: {e}")
+                _ITEMS = pd.DataFrame()
         else:
-            # Fallback biar gak error kalau file item belum ada
-            print("[WARNING] File item tidak ditemukan.")
+            print("[WARNING] File mlbb_items_dataset_enriched.csv tidak ditemukan. (Fitur detail item mungkin terbatas)")
             _ITEMS = pd.DataFrame(columns=["Item", "Item_norm"])
 
     return _HEROES, _ITEMS
 
 def get_all_hero_names() -> list[str]:
+    """Mengembalikan list semua nama hero yang tersedia."""
     h, _ = load_datasets()
-    if h.empty: return []
-    return h["Hero"].tolist()
+    if h.empty or "Hero" not in h.columns:
+        return []
+    return h["Hero"].dropna().tolist()
 
 def get_hero_by_name(name: str) -> dict | None:
+    """Mencari data hero berdasarkan nama (exact atau partial match)."""
     if not name: return None
     h, _ = load_datasets()
     
     if h.empty: return None
     
-    # Cari exact match
-    row = h[h["Hero_norm"] == name.lower()]
-    if row.empty:
-        # Cari partial match (misal: "nana" ketemu di "Nana")
-        alt = h[h["Hero"].str.lower().str.contains(name.lower())]
-        if alt.empty: return None
-        row = alt.iloc[[0]]
+    name_lower = name.lower().strip()
     
-    return row.iloc[0].to_dict()
+    # 1. Cari Exact Match di kolom Hero_norm
+    row = h[h["Hero_norm"] == name_lower]
+    
+    # 2. Jika tidak ada, cari Partial Match (misal: "leo" -> "Leomord")
+    if row.empty:
+        # Filter yang mengandung string input
+        mask = h["Hero_norm"].str.contains(name_lower, na=False)
+        row = h[mask]
+    
+    if row.empty:
+        return None
+    
+    # Ambil hasil pertama dan ubah ke dictionary
+    # fillna("") agar data kosong tidak jadi NaN (memudahkan pemrosesan string nanti)
+    return row.iloc[0].fillna("").to_dict()
 
 def list_heroes_by_role(role: str) -> list[str]:
+    """Mengembalikan list nama hero berdasarkan Role."""
     h, _ = load_datasets()
-    if h.empty: return []
+    if h.empty or "Role" not in h.columns:
+        return []
     
-    role = (role or "").lower()
-    # Sesuaikan kolom role di CSV baru kamu.
-    # Di file lama kolomnya: Role_Lane_1, dll. 
-    # Di file baru (build_meta2025) kolom utamanya adalah "Role"
-    
-    # Kita cek kolom 'Role' dulu
-    if "Role" in h.columns:
-        mask = h["Role"].str.lower().str.contains(role)
-        return h.loc[mask, "Hero"].tolist()
-    
-    return []
+    role_lower = role.lower().strip()
+    # Cari hero yang kolom Role-nya mengandung kata kunci input
+    mask = h["Role"].astype(str).str.lower().str.contains(role_lower, na=False)
+    return h.loc[mask, "Hero"].tolist()
 
 def list_heroes_by_lane(lane: str) -> list[str]:
+    """Mengembalikan list nama hero berdasarkan Primary atau Secondary Lane."""
     h, _ = load_datasets()
     if h.empty: return []
     
-    lane = (lane or "").lower()
-    # Di file build_meta2025, kolom lane adalah "PrimaryLane" atau "SecondaryLane"
-    mask = h.apply(lambda r: lane in str(r.get("PrimaryLane", "")).lower() or lane in str(r.get("SecondaryLane", "")).lower(), axis=1)
-    return h.loc[mask, "Hero"].tolist()
+    lane_lower = lane.lower().strip()
+    
+    # Cek di PrimaryLane ATAU SecondaryLane
+    # Pastikan kolom ada sebelum dicek
+    mask1 = pd.Series([False] * len(h))
+    mask2 = pd.Series([False] * len(h))
+
+    if "PrimaryLane" in h.columns:
+        mask1 = h["PrimaryLane"].astype(str).str.lower().str.contains(lane_lower, na=False)
+    
+    if "SecondaryLane" in h.columns:
+        mask2 = h["SecondaryLane"].astype(str).str.lower().str.contains(lane_lower, na=False)
+        
+    return h.loc[mask1 | mask2, "Hero"].tolist()
