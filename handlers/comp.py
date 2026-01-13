@@ -8,82 +8,43 @@ from core.gemini import compose_with_gemini
 
 router = Router()
 
-# =========================================================
-# LOGIKA UTAMA (Dipakai oleh Command & Menu)
-# =========================================================
 async def process_comp_request(m: Message, hero_name: str):
-    """
-    Memproses permintaan komposisi tim menggunakan AI.
-    """
-    # 1. Validasi Hero di Database
     hero_data = get_hero_by_name(hero_name)
-    
     if not hero_data:
-        await m.answer(
-            f"❌ Hero <b>{hero_name}</b> tidak ditemukan.\n"
-            "Pastikan ejaan benar (contoh: Tigreal, Atlas, Estes)."
-        )
+        await m.answer(f"❌ Hero <b>{hero_name}</b> tidak ditemukan.")
         return False
 
     real_name = hero_data.get('Hero', hero_name)
     role = hero_data.get('Role', 'Unknown')
 
-    # 2. Kirim Pesan Loading
-    loading_msg = await m.answer(f"🤖 <b>Coach AI sedang meracik tim untuk {real_name} ({role})...</b>")
+    loading_msg = await m.answer(f"🤖 <b>Coach AI sedang meracik tim untuk {real_name}...</b>")
 
-    # 3. Siapkan Payload ke AI
-    payload = {
-        "type": "comp", # Memicu prompt 'comp' di gemini.py
-        "hero": hero_data
-    }
+    payload = {"type": "comp", "hero": hero_data}
 
     try:
-        # 4. Minta Jawaban Gemini
-        response_text = compose_with_gemini(payload)
-        
-        # 5. Tampilkan Hasil
+        # Tambahkan await
+        response_text = await compose_with_gemini(payload)
         await loading_msg.edit_text(response_text, parse_mode="Markdown")
         return True
-        
     except Exception as e:
-        await loading_msg.edit_text(f"❌ Terjadi kesalahan saat menghubungi AI.\nError: {str(e)}")
+        await loading_msg.edit_text(f"❌ Error: {str(e)}")
         return False
 
-# =========================================================
-# 1. HANDLER COMMAND (/comp <hero>)
-# =========================================================
 @router.message(Command("comp"))
 async def comp_cmd(m: Message):
-    """
-    Contoh: /comp Tigreal
-    """
     args = m.text.split(maxsplit=1)
     if len(args) < 2:
-        await m.answer("⚠️ Gunakan format: <code>/comp NamaHero</code>")
+        await m.answer("⚠️ Gunakan: <code>/comp NamaHero</code>")
         return
+    await process_comp_request(m, args[1])
 
-    hero_input = args[1]
-    await process_comp_request(m, hero_input)
-
-# =========================================================
-# 2. HANDLER INPUT DARI MENU (State FSM) - BARU!
-# =========================================================
 @router.message(BotStates.waiting_for_hero_comp)
 async def comp_state_handler(m: Message, state: FSMContext):
-    """
-    Menangani input teks setelah user klik tombol 'Komposisi Team'.
-    """
     text = m.text.strip()
-    
-    # Cek command batal
-    if text.lower() in ['batal', 'cancel', 'exit', '/cancel']:
+    if text.lower() in ['batal', 'cancel', '/cancel', 'exit']:
         await state.clear()
         await m.answer("✅ Aksi dibatalkan.")
         return
-
-    # Proses request
     success = await process_comp_request(m, text)
-    
-    # Jika sukses, reset state. Jika gagal (typo), biarkan user coba lagi.
     if success:
         await state.clear()

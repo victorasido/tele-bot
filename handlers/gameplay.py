@@ -8,85 +8,42 @@ from core.gemini import compose_with_gemini
 
 router = Router()
 
-# =========================================================
-# LOGIKA UTAMA (Dipakai oleh Command & Menu)
-# =========================================================
 async def process_gameplay_request(m: Message, hero_name: str):
-    """
-    Fungsi sentral untuk memproses permintaan gameplay ke AI.
-    """
-    # 1. Validasi Hero di Database
-    # Kita butuh data Role dari CSV agar saran AI akurat (misal: Chou Tank vs Chou Fighter)
     hero_data = get_hero_by_name(hero_name)
-    
     if not hero_data:
-        await m.answer(
-            f"❌ Hero <b>{hero_name}</b> tidak ditemukan.\n"
-            "Pastikan ejaan benar (contoh: Ling, Fanny, Gusion)."
-        )
+        await m.answer(f"❌ Hero <b>{hero_name}</b> tidak ditemukan.")
         return False
 
     real_name = hero_data.get('Hero', hero_name)
-    role = hero_data.get('Role', 'Unknown')
+    
+    loading_msg = await m.answer(f"🎮 <b>Coach AI sedang menyusun guide {real_name}...</b>")
 
-    # 2. Kirim Pesan Loading
-    loading_msg = await m.answer(f"🎮 <b>Coach AI sedang menyusun panduan untuk {real_name} ({role})...</b>")
-
-    # 3. Siapkan Payload ke AI
-    payload = {
-        "type": "gameplay",  # Ini akan memicu prompt 'gameplay' di core/gemini.py
-        "hero": hero_data,
-        "input": f"Berikan guide lengkap untuk hero {real_name}"
-    }
+    payload = {"type": "gameplay", "hero": hero_data}
 
     try:
-        # 4. Minta Jawaban Gemini
-        response_text = compose_with_gemini(payload)
-        
-        # 5. Tampilkan Hasil
+        # Tambahkan await
+        response_text = await compose_with_gemini(payload)
         await loading_msg.edit_text(response_text, parse_mode="Markdown")
         return True
-        
     except Exception as e:
-        await loading_msg.edit_text(f"❌ Terjadi kesalahan saat menghubungi AI.\nError: {str(e)}")
+        await loading_msg.edit_text(f"❌ Error: {str(e)}")
         return False
 
-# =========================================================
-# 1. HANDLER COMMAND (/gameplay <hero>)
-# =========================================================
 @router.message(Command("gameplay"))
 async def gameplay_cmd(m: Message):
-    """
-    Contoh: /gameplay Fanny
-    """
     args = m.text.split(maxsplit=1)
     if len(args) < 2:
-        await m.answer("⚠️ Gunakan format: <code>/gameplay NamaHero</code>")
+        await m.answer("⚠️ Gunakan: <code>/gameplay NamaHero</code>")
         return
+    await process_gameplay_request(m, args[1])
 
-    hero_input = args[1]
-    await process_gameplay_request(m, hero_input)
-
-# =========================================================
-# 2. HANDLER INPUT DARI MENU (State FSM) - BARU!
-# =========================================================
 @router.message(BotStates.waiting_for_hero_gameplay)
 async def gameplay_state_handler(m: Message, state: FSMContext):
-    """
-    Menangani input teks setelah user klik tombol 'Gameplay Guide' di menu.
-    """
     text = m.text.strip()
-    
-    # Cek command batal
-    if text.lower() in ['batal', 'cancel', 'exit', '/cancel']:
+    if text.lower() in ['batal', 'cancel', '/cancel']:
         await state.clear()
         await m.answer("✅ Aksi dibatalkan.")
         return
-
-    # Proses request
     success = await process_gameplay_request(m, text)
-    
-    # Jika sukses (hero ketemu & AI jawab), reset state.
-    # Jika gagal (typo), biarkan state aktif biar user bisa coba lagi.
     if success:
         await state.clear()

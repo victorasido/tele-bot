@@ -5,93 +5,47 @@ from core.gemini import compose_with_gemini
 
 router = Router()
 
-# =========================================================
-# LOGIKA UTAMA: MINTA TIER LIST KE AI
-# =========================================================
 async def process_tierlist_request(message_obj, role_or_lane: str):
-    """
-    Mengirim request Tier List ke AI.
-    message_obj bisa berupa Message (dari command) atau CallbackQuery (dari tombol).
-    """
-    # Tentukan objek pesan untuk diedit/dibalas
     if isinstance(message_obj, CallbackQuery):
         msg = message_obj.message
-        # Hilangkan icon loading di tombol (penting biar gak nge-freeze)
         await message_obj.answer() 
     else:
         msg = message_obj
 
-    # 1. Kirim Pesan Loading
-    loading_msg = await msg.answer(f"📊 <b>Analis AI sedang menyusun Tier List Meta untuk {role_or_lane}...</b>")
+    loading_msg = await msg.answer(f"📊 <b>Analis AI menyusun Tier List {role_or_lane}...</b>")
 
-    # 2. Siapkan Payload
-    # Type 'tierlist' akan memicu prompt khusus di core/gemini.py
-    payload = {
-        "type": "tierlist",
-        "input": role_or_lane  # Contoh: "Mage", "Exp Lane", "Roamer"
-    }
+    payload = {"type": "tierlist", "input": role_or_lane}
 
     try:
-        # 3. Minta Jawaban Gemini
-        response_text = compose_with_gemini(payload)
-        
-        # 4. Tampilkan Hasil
+        # Tambahkan await
+        response_text = await compose_with_gemini(payload)
         await loading_msg.edit_text(response_text, parse_mode="Markdown")
-        
     except Exception as e:
-        await loading_msg.edit_text(f"❌ Gagal mengambil data Meta.\nError: {str(e)}")
+        await loading_msg.edit_text(f"❌ Error: {str(e)}")
 
-# =========================================================
-# 1. HANDLER CALLBACK DARI MENU (Tombol)
-# =========================================================
-
-# Menangani tombol Role: "tier:role:fighter", "tier:role:mage", dll
 @router.callback_query(F.data.startswith("tier:role:"))
 async def on_tier_role_click(c: CallbackQuery):
-    # Ambil role dari data tombol, misal "fighter" -> "Fighter"
     role_selected = c.data.split(":")[2].capitalize() 
     await process_tierlist_request(c, role_selected)
 
-# Menangani tombol Lane: "tier:lane:gold", "tier:lane:exp", dll
 @router.callback_query(F.data.startswith("tier:lane:"))
 async def on_tier_lane_click(c: CallbackQuery):
-    lane_selected = c.data.split(":")[2].capitalize() # contoh: "Gold"
-    
-    # Tambahkan kata "Lane" biar AI lebih paham konteksnya (kecuali Jungle/Roam)
-    if lane_selected.lower() not in ["jungle", "roam"]:
-        lane_input = f"{lane_selected} Lane"
-    else:
-        lane_input = lane_selected
-
+    lane_selected = c.data.split(":")[2].capitalize()
+    lane_input = f"{lane_selected} Lane" if lane_selected.lower() not in ["jungle", "roam"] else lane_selected
     await process_tierlist_request(c, lane_input)
-
-# =========================================================
-# 2. HANDLER COMMAND MANUAL (/tierrole, /tierlane)
-# =========================================================
 
 @router.message(Command("tierlist"))
 async def tier_general_cmd(m: Message):
-    """Contoh: /tierlist"""
-    await m.answer(
-        "Gunakan format spesifik:\n"
-        "👉 /tierrole <Role> (contoh: <code>/tierrole Mage</code>)\n"
-        "👉 /tierlane <Lane> (contoh: <code>/tierlane Gold</code>)"
-    )
+    await m.answer("Gunakan: /tierrole [Role] atau /tierlane [Lane]")
 
 @router.message(Command("tierrole"))
 async def tier_role_cmd(m: Message):
-    """Contoh: /tierrole Mage"""
     args = m.text.split(maxsplit=1)
-    if len(args) < 2:
-        await m.answer("Gunakan: <code>/tierrole NamaRole</code>\nContoh: <code>/tierrole Mage</code>")
-        return
+    if len(args) < 2: return
     await process_tierlist_request(m, args[1])
 
 @router.message(Command("tierlane"))
 async def tier_lane_cmd(m: Message):
-    """Contoh: /tierlane Gold"""
     args = m.text.split(maxsplit=1)
-    if len(args) < 2:
-        await m.answer("Gunakan: <code>/tierlane NamaLane</code>\nContoh: <code>/tierlane Gold</code>")
-        return
+    if len(args) < 2: return
     await process_tierlist_request(m, args[1])
