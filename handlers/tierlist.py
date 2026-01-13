@@ -1,9 +1,44 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
-from data.dal import list_heroes_by_role, list_heroes_by_lane
+from core.gemini import compose_with_gemini
 
 router = Router()
+
+# =========================================================
+# LOGIKA UTAMA: MINTA TIER LIST KE AI
+# =========================================================
+async def process_tierlist_request(message_obj, role_or_lane: str):
+    """
+    Mengirim request Tier List ke AI.
+    message_obj bisa berupa Message (dari command) atau CallbackQuery (dari tombol).
+    """
+    # Tentukan objek pesan untuk diedit/dibalas
+    if isinstance(message_obj, CallbackQuery):
+        msg = message_obj.message
+        await message_obj.answer() # Hilangkan loading di tombol
+    else:
+        msg = message_obj
+
+    # 1. Kirim Pesan Loading
+    loading_msg = await msg.answer(f"📊 <b>Analis AI sedang menyusun Tier List Meta untuk {role_or_lane}...</b>")
+
+    # 2. Siapkan Payload
+    # Type 'tierlist' akan memicu prompt khusus di core/gemini.py
+    payload = {
+        "type": "tierlist",
+        "input": role_or_lane  # Contoh: "Mage", "Exp Lane", "Roamer"
+    }
+
+    try:
+        # 3. Minta Jawaban Gemini
+        response_text = compose_with_gemini(payload)
+        
+        # 4. Tampilkan Hasil
+        await loading_msg.edit_text(response_text, parse_mode="Markdown")
+        
+    except Exception as e:
+        await loading_msg.edit_text(f"❌ Gagal mengambil data Meta.\nError: {str(e)}")
 
 # =========================================================
 # 1. HANDLER CALLBACK DARI MENU (Tombol)
@@ -12,54 +47,34 @@ router = Router()
 # Menangani tombol Role: "tier:role:fighter", "tier:role:mage", dll
 @router.callback_query(F.data.startswith("tier:role:"))
 async def on_tier_role_click(c: CallbackQuery):
-    # Ambil role dari data tombol (split string)
-    role_selected = c.data.split(":")[2]  # contoh: "fighter"
-    
-    # Ambil data dari CSV via DAL
-    heroes = list_heroes_by_role(role_selected)
-    
-    # Format output
-    if heroes:
-        hero_list = ", ".join(sorted(heroes))
-        text = (
-            f"📊 <b>Daftar Hero Role: {role_selected.capitalize()}</b>\n"
-            f"━━━━━━━━━━━━━━━━━━\n"
-            f"{hero_list}\n"
-            f"━━━━━━━━━━━━━━━━━━\n"
-            f"<i>Total: {len(heroes)} Hero</i>"
-        )
-    else:
-        text = f"❌ Tidak ada hero ditemukan untuk role <b>{role_selected}</b>."
-
-    # Edit pesan menu sebelumnya
-    await c.message.edit_text(text)
-    await c.answer()
+    role_selected = c.data.split(":")[2].capitalize() # contoh: "Fighter"
+    await process_tierlist_request(c, role_selected)
 
 # Menangani tombol Lane: "tier:lane:gold", "tier:lane:exp", dll
 @router.callback_query(F.data.startswith("tier:lane:"))
 async def on_tier_lane_click(c: CallbackQuery):
-    lane_selected = c.data.split(":")[2]  # contoh: "gold"
+    lane_selected = c.data.split(":")[2].capitalize() # contoh: "Gold"
     
-    heroes = list_heroes_by_lane(lane_selected)
-    
-    if heroes:
-        hero_list = ", ".join(sorted(heroes))
-        text = (
-            f"🗺 <b>Daftar Hero Lane: {lane_selected.capitalize()}</b>\n"
-            f"━━━━━━━━━━━━━━━━━━\n"
-            f"{hero_list}\n"
-            f"━━━━━━━━━━━━━━━━━━\n"
-            f"<i>Total: {len(heroes)} Hero</i>"
-        )
+    # Tambahkan kata "Lane" biar AI lebih paham konteksnya (kecuali Jungle/Roam)
+    if lane_selected.lower() not in ["jungle", "roam"]:
+        lane_input = f"{lane_selected} Lane"
     else:
-        text = f"❌ Tidak ada hero ditemukan untuk lane <b>{lane_selected}</b>."
+        lane_input = lane_selected
 
-    await c.message.edit_text(text)
-    await c.answer()
+    await process_tierlist_request(c, lane_input)
 
 # =========================================================
-# 2. HANDLER COMMAND MANUAL (/tierrole, /tierlane)
+# 2. HANDLER COMMAND MANUAL (/tierrole, /tierlane, /tierlist)
 # =========================================================
+
+@router.message(Command("tierlist"))
+async def tier_general_cmd(m: Message):
+    """Contoh: /tierlist"""
+    await m.answer(
+        "Gunakan format spesifik:\n"
+        "👉 /tierrole <Role> (contoh: <code>/tierrole Mage</code>)\n"
+        "👉 /tierlane <Lane> (contoh: <code>/tierlane Gold</code>)"
+    )
 
 @router.message(Command("tierrole"))
 async def tier_role_cmd(m: Message):
@@ -68,14 +83,7 @@ async def tier_role_cmd(m: Message):
     if len(args) < 2:
         await m.answer("Gunakan: <code>/tierrole NamaRole</code>\nContoh: <code>/tierrole Mage</code>")
         return
-        
-    role = args[1]
-    heroes = list_heroes_by_role(role)
-    
-    if heroes:
-        await m.answer(f"📊 <b>Role {role}:</b>\n" + ", ".join(sorted(heroes)))
-    else:
-        await m.answer(f"Tidak ada hero dengan role '{role}'.")
+    await process_tierlist_request(m, args[1])
 
 @router.message(Command("tierlane"))
 async def tier_lane_cmd(m: Message):
@@ -84,11 +92,4 @@ async def tier_lane_cmd(m: Message):
     if len(args) < 2:
         await m.answer("Gunakan: <code>/tierlane NamaLane</code>\nContoh: <code>/tierlane Gold</code>")
         return
-        
-    lane = args[1]
-    heroes = list_heroes_by_lane(lane)
-    
-    if heroes:
-        await m.answer(f"🗺 <b>Lane {lane}:</b>\n" + ", ".join(sorted(heroes)))
-    else:
-        await m.answer(f"Tidak ada hero di lane '{lane}'.")
+    await process_tierlist_request(m, args[1])
