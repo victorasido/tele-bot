@@ -9,11 +9,11 @@ from core.gemini import compose_with_gemini
 router = Router()
 
 # =========================================================
-# LOGIKA INTI (Digunakan oleh Command & Menu)
+# LOGIKA UTAMA (Dipakai oleh Command & Menu)
 # =========================================================
 async def process_gameplay_request(m: Message, hero_name: str):
     """
-    Fungsi utama untuk memproses permintaan gameplay ke AI.
+    Fungsi sentral untuk memproses permintaan gameplay ke AI.
     """
     # 1. Validasi Hero di Database
     # Kita butuh data Role dari CSV agar saran AI akurat (misal: Chou Tank vs Chou Fighter)
@@ -68,12 +68,12 @@ async def gameplay_cmd(m: Message):
     await process_gameplay_request(m, hero_input)
 
 # =========================================================
-# 2. HANDLER INPUT DARI MENU (State FSM)
+# 2. HANDLER INPUT DARI MENU (State FSM) - BARU!
 # =========================================================
 @router.message(BotStates.waiting_for_hero_gameplay)
 async def gameplay_state_handler(m: Message, state: FSMContext):
     """
-    Menangani input teks setelah user klik tombol 'Gameplay' di menu.
+    Menangani input teks setelah user klik tombol 'Gameplay Guide' di menu.
     """
     text = m.text.strip()
     

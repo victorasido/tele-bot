@@ -16,7 +16,8 @@ async def process_tierlist_request(message_obj, role_or_lane: str):
     # Tentukan objek pesan untuk diedit/dibalas
     if isinstance(message_obj, CallbackQuery):
         msg = message_obj.message
-        await message_obj.answer() # Hilangkan loading di tombol
+        # Hilangkan icon loading di tombol (penting biar gak nge-freeze)
+        await message_obj.answer() 
     else:
         msg = message_obj
 
@@ -47,7 +48,8 @@ async def process_tierlist_request(message_obj, role_or_lane: str):
 # Menangani tombol Role: "tier:role:fighter", "tier:role:mage", dll
 @router.callback_query(F.data.startswith("tier:role:"))
 async def on_tier_role_click(c: CallbackQuery):
-    role_selected = c.data.split(":")[2].capitalize() # contoh: "Fighter"
+    # Ambil role dari data tombol, misal "fighter" -> "Fighter"
+    role_selected = c.data.split(":")[2].capitalize() 
     await process_tierlist_request(c, role_selected)
 
 # Menangani tombol Lane: "tier:lane:gold", "tier:lane:exp", dll
@@ -64,7 +66,7 @@ async def on_tier_lane_click(c: CallbackQuery):
     await process_tierlist_request(c, lane_input)
 
 # =========================================================
-# 2. HANDLER COMMAND MANUAL (/tierrole, /tierlane, /tierlist)
+# 2. HANDLER COMMAND MANUAL (/tierrole, /tierlane)
 # =========================================================
 
 @router.message(Command("tierlist"))
