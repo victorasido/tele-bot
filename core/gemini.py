@@ -1,19 +1,25 @@
 import os
+import asyncio
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Konfigurasi API Key
 API_KEY = os.getenv("GEMINI_API_KEY")
 
 if API_KEY:
     genai.configure(api_key=API_KEY)
-else:
-    print("[WARNING] GEMINI_API_KEY tidak ditemukan di .env")
 
-# Konfigurasi Model
+# --- SAFETY SETTINGS (Anti Baper) ---
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+}
+
 generation_config = {
     "temperature": 0.7,
     "top_p": 0.95,
@@ -21,59 +27,84 @@ generation_config = {
     "max_output_tokens": 1024,
 }
 
-# Inisialisasi Model (Pakai gemini-2.0-flash sesuai akunmu)
+# --- UPDATE MODEL: Pindah ke FLASH-LITE (Lebih Tahan Banting) ---
 try:
+    # Prioritas 1: Gemini 2.0 Flash Lite (Kuota 30 RPM - Lebih Banyak)
     model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash", 
-        generation_config=generation_config
+        model_name="gemini-2.0-flash-lite",
+        generation_config=generation_config,
+        safety_settings=safety_settings
     )
-except Exception as e:
-    print(f"[ERROR INIT AI] Gagal load gemini-2.0-flash: {e}")
-    model = genai.GenerativeModel("gemini-pro")
+except Exception:
+    try:
+        # Prioritas 2: Gemini 2.0 Flash (Kuota 15 RPM)
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash-lite", 
+            generation_config=generation_config,
+            safety_settings=safety_settings
+        )
+    except:
+        # Fallback terakhir
+        model = genai.GenerativeModel("gemini-pro", safety_settings=safety_settings)
 
-# --- FUNGSI ASYNC (AGAR TIDAK LEMOT) ---
-async def compose_with_gemini(payload: dict) -> str:
-    """
-    Mengirim prompt ke Gemini secara Asynchronous.
-    Bot tidak akan freeze saat menunggu jawaban.
-    """
+async def compose_with_gemini(payload: dict, retries=2) -> str:
     if not API_KEY:
-        return "⚠️ API Key belum diisi di .env"
+        return "⚠️ API Key belum diisi."
 
+    # -- Persiapan Prompt --
     task_type = payload.get("type", "chat")
     hero_data = payload.get("hero", {})
     user_input = payload.get("input", "")
 
-    # Ambil info hero
     hero_name = hero_data.get("Hero", user_input) if isinstance(hero_data, dict) else str(user_input)
     hero_role = hero_data.get("Role", "") if isinstance(hero_data, dict) else ""
     
-    # Prompt Engineering
     prompts = {
         "comp": (
-            f"Bertindaklah sebagai pelatih pro MLBB. User ingin bermain hero **{hero_name}** ({hero_role}).\n"
-            f"Buatkan **Komposisi Tim 5 Hero** yang sempurna. Jelaskan synergy dan nama strateginya."
+            f"Roleplay: Pro Coach MLBB. Konteks: Game Strategy.\n"
+            f"User pick hero **{hero_name}** ({hero_role}).\n"
+            f"Buatkan draft pick tim 5 hero yang sinergi & nama strateginya."
         ),
         "counter": (
-            f"Bertindaklah sebagai analis MLBB. User kesulitan melawan hero **{hero_name}** ({hero_role}).\n"
-            f"Sebutkan 3 Hero Counter Telak, Item Counter wajib, dan Tips Gameplay/Rotasi."
+            f"Roleplay: Analis MLBB. Konteks: Game Strategy.\n"
+            f"Musuh pick **{hero_name}** ({hero_role}).\n"
+            f"Sebutkan 3 Hero Counter (Hard Counter), Item Counter, dan Tips Gameplay."
         ),
         "gameplay": (
-            f"Buatkan panduan gameplay Micro & Macro untuk hero **{hero_name}** ({hero_role}).\n"
-            f"Fokus pada Skill Combo, Fase Game (Early/Late), dan Power Spike."
+            f"Roleplay: Guide MLBB. Konteks: Game Strategy.\n"
+            f"Guide **{hero_name}** ({hero_role}): Combo Skill, Power Spike, Rotasi."
         ),
         "tierlist": (
-            f"Buatkan **Tier List Meta MLBB Terbaru** untuk role/lane: **{user_input}**.\n"
-            f"Klasifikasikan ke Tier S, A, dan B beserta alasannya."
+            f"Tier List Meta MLBB terbaru untuk: **{user_input}**.\n"
+            f"Klasifikasikan Tier S, A, B. Singkat saja."
         ),
-        "chat": f"Jawab singkat ala pro player: {user_input}"
+        "chat": f"Jawab singkat soal MLBB: {user_input}"
     }
 
     final_prompt = prompts.get(task_type, prompts["chat"])
 
-    try:
-        # PENTING: Pakai await generate_content_async
-        response = await model.generate_content_async(final_prompt)
-        return response.text.strip()
-    except Exception as e:
-        return f"❌ Maaf, AI sedang sibuk/error. Detail: {str(e)}"
+    # -- RETRY LOGIC --
+    for attempt in range(retries + 1):
+        try:
+            response = await model.generate_content_async(final_prompt)
+            if response.prompt_feedback and response.prompt_feedback.block_reason:
+                return "⚠️ Konten diblokir filter AI."
+            return response.text.strip()
+
+        except Exception as e:
+            error_msg = str(e)
+            # Jika server penuh (429), kita tunggu lebih lama (3-5 detik)
+            if "429" in error_msg or "ResourceExhausted" in error_msg:
+                if attempt < retries:
+                    wait_time = 3 * (attempt + 1) # Tunggu 3 detik, lalu 6 detik
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    return "⏳ Server AI lagi rame banget (Limit Habis). Coba 1 menit lagi ya!"
+            
+            print(f"[ERROR GEMINI] Attempt {attempt+1}: {e}")
+            if attempt < retries:
+                await asyncio.sleep(1)
+                continue
+            
+    return "❌ Gagal terhubung ke AI."

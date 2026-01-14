@@ -1,17 +1,4 @@
 Role,Hero,PrimaryLane,SecondaryLane,Type,PlayStyle,BuildStyle,BuildVariant,PenType,Patch,Item1,Item2,Item3,Item4,Item5,Item6
-Assassin,Ling,Jungle,-,Energy Assassin,High mobility pick-off,Basic Crit DPS,Sustain,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Windtalker,Malefic Gun,Blade of Despair,Wind of Nature
-Assassin,Lancelot,Jungle,-,Mana Assassin,In-out skill burst,Skill Burst,Burst,Malefic Gun,1.9.92,Warrior Boots,War Axe,Hunter Strike,Malefic Gun,Blade of Despair,Immortality
-Assassin,Hayabusa,Jungle,EXP,Energy Assassin,Split-push & burst,Skill Burst,Burst,Malefic Gun,1.9.92,Warrior Boots,War Axe,Hunter Strike,Malefic Gun,Blade of Despair,Immortality
-Assassin,Saber,Jungle,Roam,Mana Assassin,Single-target delete,Skill Burst,Burst,Malefic Gun,1.9.92,Warrior Boots,Hunter Strike,Malefic Gun,Blade of Despair,Endless Battle,Immortality
-Assassin,Helcurt,Jungle,-,Mana Assassin,Anti-MM on-hit DPS,On-hit DPS,Sustain,Malefic Gun,1.9.92,Swift Boots,Demon Hunter Sword,Corrosion Scythe,Malefic Gun,Blade of Despair,Wind of Nature
-Assassin,Natalia,Roam,Jungle,No Mana Assassin,Stealth pick-off,Crit Burst,Burst,Malefic Gun,1.9.92,Swift Boots,Berserker's Fury,Windtalker,Malefic Gun,Blade of Despair,Immortality
-Assassin,Benedetta,EXP,Jungle,Energy Assassin,Outplay skirmisher,Hybrid Fighter Sustain,Sustain,Malefic Gun,1.9.92,Warrior Boots,War Axe,Bloodlust Axe,Malefic Gun,Dominance Ice,Immortality
-Assassin,Nolan,Jungle,-,Energy Assassin,High tempo dash burst,Skill Burst,Burst,Malefic Gun,1.9.92,Warrior Boots,War Axe,Hunter Strike,Malefic Gun,Blade of Despair,Immortality
-Assassin,Gusion,Jungle,Mid,Magic Assassin,Combo in-out,Burst Mage,Burst,Magic Pen,1.9.92,Arcane Boots,Genius Wand,Holy Crystal,Divine Glaive,Concentrated Energy,Immortality
-Assassin,Aamon,Jungle,-,Magic Assassin,Fade-in sustain burst,Hybrid Sustain,Sustain,Magic Pen,1.9.92,Arcane Boots,Genius Wand,Concentrated Energy,Holy Crystal,Divine Glaive,Immortality
-Assassin,Karina,Jungle,-,Magic Assassin,Melee magic bruiser,On-hit Magic Sustain,Sustain,Magic Pen,1.9.92,Tough Boots,Starlium Scythe,Concentrated Energy,Divine Glaive,Holy Crystal,Immortality
-Assassin,Joy,EXP,Jungle,Energy Mage Assassin,Spam mobility,Sustain DPS,Sustain,Magic Pen,1.9.92,Tough Boots,Glowing Wand,Genius Wand,Concentrated Energy,Holy Crystal,Immortality
-Assassin,Selena,Roam,Mid,Magic Assassin,Pick + trap stun,Burst Mage,Burst,Magic Pen,1.9.92,Arcane Boots,Genius Wand,Lightning Truncheon,Divine Glaive,Holy Crystal,Immortality
 Fighter,Paquito,EXP,Jungle,Energy Fighter,Short-trade spam,CDR Burst + Pen,,,1.9.92,Warrior Boots,War Axe,Hunter Strike,Dominance Ice,Malefic Roar,Immortality
 Fighter,Leomord,EXP,Jungle,Mana Fighter,Cavalry Burst,Burst + Pen,,,1.9.92,Tough Boots,Endless Battle,War Axe,Blade of Despair,Malefic Roar,Immortality
 Fighter,Lapu-Lapu,EXP,-,Mana Fighter,Hybrid Dive,CDR + Burst,,,1.9.92,Warrior Boots,War Axe,Bloodlust Axe,Dominance Ice,Brute Force Breastplate,Immortality
