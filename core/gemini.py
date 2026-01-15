@@ -1,110 +1,159 @@
 import os
 import asyncio
+import json
+from pathlib import Path
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+# ==========================================
+# 1. SETUP API & MULTI-KEY
+# ==========================================
+KEYS_STRING = os.getenv("GEMINI_API_KEYS", "")
+API_KEYS = [k.strip() for k in KEYS_STRING.split(",") if k.strip()]
 
-if API_KEY:
-    genai.configure(api_key=API_KEY)
+if not API_KEYS:
+    single = os.getenv("GEMINI_API_KEY")
+    if single: API_KEYS = [single]
 
-# --- SAFETY SETTINGS (Anti Baper) ---
-safety_settings = {
-    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-}
+current_key_index = 0
 
-generation_config = {
-    "temperature": 0.7,
-    "top_p": 0.95,
-    "top_k": 40,
-    "max_output_tokens": 1024,
-}
+def get_active_model():
+    global current_key_index
+    if not API_KEYS: return None
+    genai.configure(api_key=API_KEYS[current_key_index])
+    
+    safety = {
+        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    }
+    config = {"temperature": 0.7, "top_p": 0.95, "max_output_tokens": 1024}
 
-# --- UPDATE MODEL: Pindah ke FLASH-LITE (Lebih Tahan Banting) ---
-try:
-    # Prioritas 1: Gemini 2.0 Flash Lite (Kuota 30 RPM - Lebih Banyak)
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash-lite",
-        generation_config=generation_config,
-        safety_settings=safety_settings
-    )
-except Exception:
     try:
-        # Prioritas 2: Gemini 2.0 Flash (Kuota 15 RPM)
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-lite", 
-            generation_config=generation_config,
-            safety_settings=safety_settings
-        )
+        return genai.GenerativeModel("gemini-2.0-flash-lite", generation_config=config, safety_settings=safety)
     except:
-        # Fallback terakhir
-        model = genai.GenerativeModel("gemini-pro", safety_settings=safety_settings)
+        return genai.GenerativeModel("gemini-pro", generation_config=config, safety_settings=safety)
 
-async def compose_with_gemini(payload: dict, retries=2) -> str:
-    if not API_KEY:
-        return "⚠️ API Key belum diisi."
+def rotate_key():
+    global current_key_index
+    if len(API_KEYS) > 1:
+        current_key_index = (current_key_index + 1) % len(API_KEYS)
+        print(f"🔄 [QUEUE] Switch Key ke Index: {current_key_index}")
+        return True
+    return False
 
-    # -- Persiapan Prompt --
+# ==========================================
+# 2. SISTEM CACHING (MEMORI)
+# ==========================================
+CACHE_FILE = Path(__file__).resolve().parent.parent / "data" / "ai_cache.json"
+
+def load_cache():
+    if CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except: return {}
+    return {}
+
+def save_to_cache(key, value):
+    try:
+        data = load_cache()
+        data[key] = value
+        # Pastikan folder data ada
+        CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"⚠️ Gagal simpan cache: {e}")
+
+# ==========================================
+# 3. CORE LOGIC (INTERNAL)
+# ==========================================
+async def _process_gemini_request(payload: dict) -> str:
+    if not API_KEYS: return "⚠️ API Key belum diisi."
+
+    # Prompt Engineering
     task_type = payload.get("type", "chat")
     hero_data = payload.get("hero", {})
     user_input = payload.get("input", "")
-
-    hero_name = hero_data.get("Hero", user_input) if isinstance(hero_data, dict) else str(user_input)
-    hero_role = hero_data.get("Role", "") if isinstance(hero_data, dict) else ""
+    h_name = hero_data.get("Hero", str(user_input))
+    h_role = hero_data.get("Role", "Unknown")
     
+    context = f"Hero: {h_name} | Role: {h_role}"
     prompts = {
-        "comp": (
-            f"Roleplay: Pro Coach MLBB. Konteks: Game Strategy.\n"
-            f"User pick hero **{hero_name}** ({hero_role}).\n"
-            f"Buatkan draft pick tim 5 hero yang sinergi & nama strateginya."
-        ),
-        "counter": (
-            f"Roleplay: Analis MLBB. Konteks: Game Strategy.\n"
-            f"Musuh pick **{hero_name}** ({hero_role}).\n"
-            f"Sebutkan 3 Hero Counter (Hard Counter), Item Counter, dan Tips Gameplay."
-        ),
-        "gameplay": (
-            f"Roleplay: Guide MLBB. Konteks: Game Strategy.\n"
-            f"Guide **{hero_name}** ({hero_role}): Combo Skill, Power Spike, Rotasi."
-        ),
-        "tierlist": (
-            f"Tier List Meta MLBB terbaru untuk: **{user_input}**.\n"
-            f"Klasifikasikan Tier S, A, B. Singkat saja."
-        ),
-        "chat": f"Jawab singkat soal MLBB: {user_input}"
+        "comp": f"Roleplay: Coach MLBB. Data: {context}. Draft Pick 5 Hero sinergi & Strategi.",
+        "counter": f"Roleplay: Analis MLBB. Data: {context}. 3 Hard Counter & Tips Gameplay.",
+        "gameplay": f"Roleplay: Top Global {h_name}. Data: {context}. Guide Mikro/Makro.",
+        "tierlist": f"Tier List MLBB singkat: {user_input}.",
+        "chat": f"Jawab singkat MLBB: {user_input}"
     }
-
     final_prompt = prompts.get(task_type, prompts["chat"])
 
-    # -- RETRY LOGIC --
-    for attempt in range(retries + 1):
+    for attempt in range(2):
         try:
+            model = get_active_model()
+            if not model: return "❌ Init Error."
             response = await model.generate_content_async(final_prompt)
             if response.prompt_feedback and response.prompt_feedback.block_reason:
-                return "⚠️ Konten diblokir filter AI."
+                return "⚠️ Terblokir Safety Filter."
             return response.text.strip()
-
         except Exception as e:
-            error_msg = str(e)
-            # Jika server penuh (429), kita tunggu lebih lama (3-5 detik)
-            if "429" in error_msg or "ResourceExhausted" in error_msg:
-                if attempt < retries:
-                    wait_time = 3 * (attempt + 1) # Tunggu 3 detik, lalu 6 detik
-                    await asyncio.sleep(wait_time)
+            err = str(e)
+            if "429" in err or "ResourceExhausted" in err:
+                if rotate_key(): 
+                    await asyncio.sleep(1)
                     continue
-                else:
-                    return "⏳ Server AI lagi rame banget (Limit Habis). Coba 1 menit lagi ya!"
-            
-            print(f"[ERROR GEMINI] Attempt {attempt+1}: {e}")
-            if attempt < retries:
-                await asyncio.sleep(1)
-                continue
-            
-    return "❌ Gagal terhubung ke AI."
+                return "⏳ Server Penuh."
+            await asyncio.sleep(1)
+    return "❌ Gagal koneksi AI."
+
+# ==========================================
+# 4. QUEUE WORKER
+# ==========================================
+request_queue = asyncio.Queue()
+
+async def queue_worker():
+    print("🚀 [SYSTEM] Smart Worker Berjalan (Cache + Queue)...")
+    while True:
+        payload, cache_key, future = await request_queue.get()
+        try:
+            result = await _process_gemini_request(payload)
+            # Simpan ke cache jika sukses
+            if "❌" not in result and "⏳" not in result:
+                save_to_cache(cache_key, result)
+            future.set_result(result)
+        except Exception as e:
+            future.set_exception(e)
+        finally:
+            request_queue.task_done()
+            await asyncio.sleep(1.5) # Jeda aman
+
+async def init_gemini_worker():
+    asyncio.create_task(queue_worker())
+
+# ==========================================
+# 5. PUBLIC FUNCTION (ENTRY POINT)
+# ==========================================
+async def compose_with_gemini(payload: dict) -> str:
+    # 1. GENERATE CACHE KEY
+    task = payload.get("type", "chat")
+    inp = payload.get("input", "")
+    h_name = payload.get("hero", {}).get("Hero", inp)
+    cache_key = f"{task}_{h_name}".lower().replace(" ", "_")
+
+    # 2. CEK CACHE (JALUR CEPAT)
+    memory = load_cache()
+    if cache_key in memory:
+        print(f"⚡ [CACHE HIT] {cache_key} ditemukan! Skip AI.")
+        return memory[cache_key]
+
+    # 3. MASUK ANTRIAN (JALUR LAMBAT)
+    print(f"🐢 [CACHE MISS] {cache_key} masuk antrian...")
+    loop = asyncio.get_running_loop()
+    future = loop.create_future()
+    await request_queue.put((payload, cache_key, future))
+    return await future

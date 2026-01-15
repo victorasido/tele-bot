@@ -1,44 +1,48 @@
-# bot.py
 import asyncio
+import logging
 import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties  # ⬅️ import baru
+from aiogram.fsm.storage.memory import MemoryStorage
 
-from handlers import menu, hero, counter, gameplay, comp, tierlist
+# Import Handler
+from handlers import menu, hero, comp, counter, gameplay, tierlist
+
+# Import Inisiator Worker Gemini
+from core.gemini import init_gemini_worker  # <--- TAMBAHAN 1
 
 load_dotenv()
-
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-if not TELEGRAM_BOT_TOKEN:
-    raise RuntimeError("TELEGRAM_BOT_TOKEN kosong. Isi di .env")
-
-print("[BOOT] Telegram token OK")
-print("[BOOT] Gemini:", "AKTIF" if GEMINI_API_KEY else "TIDAK ADA (pakai dummy)")
-
-# ⬇️ gunakan DefaultBotProperties, bukan parse_mode= di Bot()
-bot = Bot(
-    token=TELEGRAM_BOT_TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-)
-dp = Dispatcher()
-
-# Registrasi router
-
-dp.include_router(menu.router)  
-dp.include_router(hero.router)
-dp.include_router(counter.router)
-dp.include_router(gameplay.router)
-dp.include_router(comp.router)
-dp.include_router(tierlist.router)
+TOKEN = os.getenv("BOT_TOKEN")
 
 async def main():
-    me = await bot.get_me()
-    print(f"[BOOT] @{me.username} ready")
+    logging.basicConfig(level=logging.INFO)
+    
+    if not TOKEN:
+        print("Error: BOT_TOKEN tidak ditemukan di .env")
+        return
+
+    bot = Bot(token=TOKEN)
+    dp = Dispatcher(storage=MemoryStorage())
+
+    # Register Router
+    dp.include_router(menu.router)
+    dp.include_router(hero.router)
+    dp.include_router(comp.router)
+    dp.include_router(counter.router)
+    dp.include_router(gameplay.router)
+    dp.include_router(tierlist.router)
+
+    # Delete webhook biar gak conflict
+    await bot.delete_webhook(drop_pending_updates=True)
+    
+    # --- NYALAKAN MESIN ANTRIAN ---
+    await init_gemini_worker()  # <--- TAMBAHAN 2 (PENTING!)
+    
+    print("🤖 @Dapsssbot Berjalan dengan Sistem Antrian...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Bot dimatikan.")
